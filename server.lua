@@ -74,3 +74,17 @@ end
 exports('generateToken', AddNewToken)
 exports('checkToken', CheckToken)
 exports('useToken', RemoveToken)
+
+AddEventHandler('onResourceStop', function(resourceName)
+  if (GetCurrentResourceName() ~= resourceName) then
+    return
+  end
+  local affectedRows = MySQL.update.await('DELETE * FROM `nt_token`')
+  if affectedRows then
+    dbg('Removed all tokens')
+    return true
+  else
+    dbg('Failed to remove all tokens')
+    return false
+  end
+end)
