@@ -1,6 +1,6 @@
 # FiveM Token System
 
-## Exports
+## Exports Server Side
 
 Generate Tokens:
 ```lua
