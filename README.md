@@ -34,6 +34,11 @@ lib.callback.register('nt_drugs:server:FarmDrgus', function(source, token)
 end)
 ```
 
+## SQL
+```sql
+CREATE TABLE `nt_token` ( `id` INT NOT NULL AUTO_INCREMENT, `token` VARCHAR(50) NOT NULL, PRIMARY KEY (`id`), UNIQUE (`token`) );
+```
+
 ## Requirements
 * ox_lib
 * ox_mysql
