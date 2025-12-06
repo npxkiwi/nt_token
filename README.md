@@ -4,15 +4,15 @@
 
 Generate Tokens:
 ```lua
-exports.nt_token:generateToken() -- This will make a new token and return the token
+exports.nt_token:CreateNewToken() -- This will make a new token and return the token
 ```
 Checking Tokens:
 ```lua
-exports.nt_token:checkToken(token) -- This is used to check if the token is valid
+exports.nt_token:CheckToken(token) -- This is used to check if the token is valid
 ```
 Removing Tokens:
 ```lua
-exports.nt_token:useToken(token) -- This will remove the token
+exports.nt_token:UseToken(token) -- This will remove the token
 ```
 
 ## Uses
@@ -20,23 +20,18 @@ Example Generate Token:
 ```lua
 lib.callback.register('nt_drugs:server:PlantDrugs', function(source)
     -- Add to database blah blah
-    return true, exports.nt_token:generateToken()
+    return true, exports.nt_token:CreateNewToken()
 end)
 ```
 Removing Token:
 ```lua
 lib.callback.register('nt_drugs:server:FarmDrgus', function(source, token)
     -- Farming blah blah
-    local RemoveToken = exports.nt_token:useToken(token)
+    local RemoveToken = exports.nt_token:UseToken(token)
     if RemoveToken then
         -- Add item to inv
     end
 end)
-```
-
-## SQL
-```sql
-CREATE TABLE `nt_token` ( `id` INT NOT NULL AUTO_INCREMENT, `token` VARCHAR(50) NOT NULL, PRIMARY KEY (`id`), UNIQUE (`token`) );
 ```
 
 ## Requirements
