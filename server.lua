@@ -1,90 +1,67 @@
-local debug<const> = true
 local string<const> = lib.string
-
+local Tokens = {}
+Config = lib.require('config')
 local function dbg(...)
-    if not ... or not debug then
+    if not ... or not Config.Debug then
         return
     end
 
-    local msg<const> = ...
     local resourceName<const> = GetCurrentResourceName()
+    local message<const> = ...
 
-    print(string.format('^2[%s]:^7 %s', resourceName, msg))
-end
----This is used to generate tokens
----@return string
-local function GenerateTokenString()
-    local token<const> = string.random('AAA-AAA',6)
-    dbg(string.format('Token: %s', token))
-    return token
+    print(string.format('^2[%s]^7: %s', resourceName, message))
 end
 
----Get tokens from database
----@param token string The token that has been made
----@return boolean
-local function CheckToken(token)
-    local result = MySQL.query.await(
-        'SELECT 1 FROM `nt_token` WHERE token = ? LIMIT 1',
-        { token }
-    )
-    return result and result[1] ~= nil
-end
-
----Insert the token to the database
----@param token string The toke
----@return boolean
-local function InsertToken(token)
-    local id = MySQL.insert.await('INSERT INTO `nt_token` (token) VALUES (?)', {
-        token
-    })
-    return id ~= nil
-end
-
----Add a new token to the database
----@return string
-local function AddNewToken()
-    for _ = 1, 10 do
-        local token = GenerateTokenString()
-
-        if not CheckToken(token) then
-            if InsertToken(token) then
-                return token
-            end
-        end
-    end
-    return false
-end
----Used to remove tokens
----@param token string The token
----@return boolean
-local function RemoveToken(token)
-    if CheckToken(token) then
-        local affectedRows = MySQL.update.await('DELETE FROM `nt_token` WHERE token = ?', {token})
-        if affectedRows then
-            dbg(string.format('Tokens removed: %s', token))
+---This is used to find a value in a table
+---@param a table The table
+---@param b string The value
+---@return boolean any Returns if it finds the value or not
+local function table_contains(a,b)
+    for i=1,#a do
+        if a[i] == b then
             return true
-        else
-            dbg(string.format('Failed to remove token: %s', token))
-            return false
         end
     end
     return false
 end
 
-exports('generateToken', AddNewToken)
-exports('checkToken', CheckToken)
-exports('useToken', RemoveToken)
+---Check the token function
+---@param _token string The token value
+---@return boolean any Returns if it find the token
+local function CheckToken(_token)
+    if not _token then
+        return false
+    end
+
+    return table_contains(Tokens, _token)
+end
+
+local function UseToken(_token)
+    if not _token then
+        return false
+    end
+    if CheckToken(_token) then
+        table.remove(Tokens, _token)
+        return true
+    end
+    return false
+end
+
+local function CreateNewToken()
+    local Token<const> = string.random('AAA-AAA')
+    dbg(('Token: %s'):format(Token))
+    table.insert(Tokens, Token)
+    return Token
+end
 
 AddEventHandler('onResourceStop', function(resourceName)
-  if (GetCurrentResourceName() ~= resourceName) then
-    return
-  end
-  local affectedRows = MySQL.update.await('DELETE * FROM `nt_token`')
-  if affectedRows then
-    dbg('Removed all tokens')
-    return true
-  else
-    dbg('Failed to remove all tokens')
-    return false
-  end
+    if (GetCurrentResourceName() ~= resourceName) then
+        return
+    end
+    Tokens = {}
 end)
+
+
+exports('CreateNewToken', CreateNewToken)
+exports('CheckToken', CheckToken)
+exports('UseToken', UseToken)
